@@ -26,15 +26,20 @@ package de.appplant.cordova.plugin.notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static de.appplant.cordova.plugin.notification.Notification.PREF_KEY;
 
@@ -454,5 +459,59 @@ public class Manager {
         return (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
     }
+
+    /**
+     * Enrico:
+     * Questo metodo viene richiamato all'interno dell'onReceive() dell'AbstractRestoreReceiver 
+     * e serve per filtrare le notifiche scadute in modo da non ristorarle all'avvio del device
+     */
+public void cleanUpExpiredNotifications(){
+    	String tag = "LOCAL_NOTIFICATIONS";
+    	Map<String, ?> prefsMap = getPrefs().getAll();
+        ArrayList<String> expiredIds = new ArrayList<String>();
+        Log.d(tag, "Avvio pulizia notifiche");
+        
+        for(Map.Entry<String,?> entry : prefsMap.entrySet()){
+        	Long expireMillis = null;
+            String jsonString = entry.getValue().toString();
+            Pattern pattern = Pattern.compile("(?:\\\"at\\\":)([0-9]{10})");
+            Matcher matcher = pattern.matcher(jsonString);
+            if(matcher.find()){
+            	long parsedSeconds = Long.parseLong(matcher.group(1));
+            	long parsedMillis = parsedSeconds * 1000;
+            	Log.d(tag,"Data attivazione notifica "+entry.getKey()+": "+new Date(parsedMillis));
+            	expireMillis = parsedMillis + (15 * 60 * 1000);
+            }else{
+            	/*
+            	 * CASO IMPOSSIBILE in cui la notifica non ha un campo "at" quindi non verra' mai mostrata
+            	 */
+            	expiredIds.add(entry.getKey());
+            }
+            
+            Log.d(tag,"Data di scadenza della notifica calcolata: "+new Date(expireMillis).toString());
+            boolean expired = new Date().after(new Date(expireMillis));
+        	if(expired){
+        		Log.d(tag,"Notifica scaduta");
+        		expiredIds.add(entry.getKey());
+        	}else{
+        		Log.d(tag,"Notifica ancora necessaria");
+        	}
+
+        }
+        SharedPreferences.Editor editor = getPrefs().edit();
+        for(String id : expiredIds){
+        	Log.d(tag,"Rimuovo notifica "+id);
+        	editor.remove(id);
+        }
+        
+        if (Build.VERSION.SDK_INT< 9) {
+        	editor.commit();
+    	} else {
+    		editor.apply();
+		}
+        Log.d(tag, "Pulizia notifiche completata");
+    }
+
+    
 
 }
