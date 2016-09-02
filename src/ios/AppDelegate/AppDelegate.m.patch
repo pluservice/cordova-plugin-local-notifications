@@ -1,0 +1,155 @@
+Index: AppDelegate.m
+===================================================================
+diff --git a/Dispositivi/trunk/imomo/myCicero/platforms/ios/myCiceroTest/Classes/AppDelegate.m b/Dispositivi/trunk/imomo/myCicero/platforms/ios/myCiceroTest/Classes/AppDelegate.m
+--- a/Dispositivi/trunk/imomo/myCicero/platforms/ios/myCiceroTest/Classes/AppDelegate.m	(revision 15240)
++++ b/Dispositivi/trunk/imomo/myCicero/platforms/ios/myCiceroTest/Classes/AppDelegate.m	(working copy)
+@@ -31,6 +31,7 @@
+ #import <FBSDKCoreKit/FBSDKCoreKit.h>
+ 
+ #import "AppLauncher.h"
++#import "AFNetworking.h"
+ 
+ @implementation AppDelegate
+ 
+@@ -58,4 +59,141 @@
+ {
+     [FBSDKAppEvents activateApp];
+ }
++
++- (void)application:(UIApplication *)application handleActionWithIdentifier:(NSString *)identifier forLocalNotification:(UILocalNotification *)notification completionHandler:(void (^)())completionHandler
++{
++    // Handle notification action ***********************************************************
++    
++    if ([@"SOSTA_CATEGORY" isEqualToString:notification.category]) {
++        
++        if ([@"SOSTA_TERMINA" isEqualToString:identifier]) {
++            NSLog(@"TERMINA SOSTA");
++            
++            AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
++            [manager POST:@"http://andreanis-7.pluservice.local:3000/terminaSosta" parameters:@{@"action": identifier} progress:^(NSProgress * _Nonnull uploadProgress) {
++                //
++                NSLog(@"PROGRESS: %f", uploadProgress.fractionCompleted);
++                //
++            } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
++                //
++                NSLog(@"SUCCESS");
++                
++                if ([responseObject isKindOfClass:NSDictionary.class]) {
++                    
++                    NSNumber *didSuccess = [responseObject objectForKey:@"Successo"];
++                    if ([@1 isEqual:didSuccess]) {
++                        // posto una nuova notifica che informa della fine della sosta
++                        UILocalNotification *noti = [UILocalNotification new];
++                        
++                        noti.fireDate = [NSDate date];
++                        noti.timeZone = [NSTimeZone defaultTimeZone];
++                        noti.applicationIconBadgeNumber = 0;
++                        noti.alertBody = [@"Fine sosta registrato correttamente per il veicolo targato " stringByAppendingString:[responseObject objectForKey:@"Targa"]];
++                        noti.soundName = UILocalNotificationDefaultSoundName;
++                        
++                        [application scheduleLocalNotification:noti];
++                    }
++                    else {
++                        // posto una nuova notifica che informa del fallimento
++                        UILocalNotification *noti = [UILocalNotification new];
++                        
++                        noti.fireDate = [NSDate date];
++                        noti.timeZone = [NSTimeZone defaultTimeZone];
++                        noti.applicationIconBadgeNumber = 0;
++                        noti.alertBody = @"ATTENZIONE: Non è stato possibile terminare la sosta";
++                        noti.soundName = UILocalNotificationDefaultSoundName;
++                        
++                        [application scheduleLocalNotification:noti];
++                    }
++                }
++                
++                completionHandler();
++                //
++            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
++                //
++                NSLog(@"FAILURE: %@", error.description);
++                NSLog(@"REASON: %@", error.localizedFailureReason);
++                
++                UILocalNotification *noti = [UILocalNotification new];
++                
++                noti.fireDate = [NSDate date];
++                noti.timeZone = [NSTimeZone defaultTimeZone];
++                noti.applicationIconBadgeNumber = 0;
++                noti.alertBody = @"ATTENZIONE: Non è stato possibile terminare la sosta";
++                noti.soundName = UILocalNotificationDefaultSoundName;
++                
++                [application scheduleLocalNotification:noti];
++                
++                completionHandler();
++                //
++            }];
++            
++        }
++        else if ([@"SOSTA_PROLUNGA" isEqualToString:identifier]) {
++            NSLog(@"PROLUNGA SOSTA");
++            
++            AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
++            [manager POST:@"http://andreanis-7.pluservice.local:3000/prolungaSosta" parameters:@{@"action": identifier} progress:^(NSProgress * _Nonnull uploadProgress) {
++                //
++                NSLog(@"PROGRESS: %f", uploadProgress.fractionCompleted);
++                //
++            } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
++                //
++                NSLog(@"SUCCESS");
++                
++                if ([responseObject isKindOfClass:NSDictionary.class]) {
++                    
++                    NSNumber *didSuccess = [responseObject objectForKey:@"Successo"];
++                    if ([@1 isEqual:didSuccess]) {
++                        // posto una nuova notifica che informa della fine della sosta
++                        UILocalNotification *noti = [UILocalNotification new];
++                        
++                        noti.fireDate = [NSDate date];
++                        noti.timeZone = [NSTimeZone defaultTimeZone];
++                        noti.applicationIconBadgeNumber = 0;
++                        noti.alertBody = [@"Sosta prolungata fino alle " stringByAppendingString:[responseObject objectForKey:@"DataOraFineSosta"]];
++                        noti.soundName = UILocalNotificationDefaultSoundName;
++                        
++                        [application scheduleLocalNotification:noti];
++                    }
++                    else {
++                        // posto una nuova notifica che informa del fallimento
++                        UILocalNotification *noti = [UILocalNotification new];
++                        
++                        noti.fireDate = [NSDate date];
++                        noti.timeZone = [NSTimeZone defaultTimeZone];
++                        noti.applicationIconBadgeNumber = 0;
++                        noti.alertBody = @"ATTENZIONE: Non è stato possibile prolungare la sosta";
++                        noti.soundName = UILocalNotificationDefaultSoundName;
++                        
++                        [application scheduleLocalNotification:noti];
++                    }
++                }
++                
++                completionHandler();
++                //
++            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
++                //
++                NSLog(@"FAILURE: %@", error.description);
++                NSLog(@"REASON: %@", error.localizedFailureReason);
++                
++                // posto una nuova notifica che informa del fallimento
++                UILocalNotification *noti = [UILocalNotification new];
++                
++                noti.fireDate = [NSDate date];
++                noti.timeZone = [NSTimeZone defaultTimeZone];
++                noti.applicationIconBadgeNumber = 0;
++                noti.alertBody = @"ATTENZIONE: Non è stato possibile prolungare la sosta";
++                noti.soundName = UILocalNotificationDefaultSoundName;
++                
++                [application scheduleLocalNotification:noti];
++                
++                completionHandler();
++                //
++            }];
++        }
++        else completionHandler();
++    }
++    else completionHandler();
++}
+ @end

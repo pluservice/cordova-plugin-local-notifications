@@ -135,6 +135,19 @@ NSString* const DEFAULT_SOUND = @"res://platform_default";
 }
 
 /**
+ * The notification's category.
+ */
+- (NSString*)category
+{
+    return @"SOSTA_CATEGORY";
+    
+    NSString *category = [dict objectForKey:@"category"];
+    
+    if ([self stringIsNullOrEmpty:category]) return nil;
+    return category;
+}
+
+/**
  * The notification's fire date.
  */
 - (NSDate*) fireDate

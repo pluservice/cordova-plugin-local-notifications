@@ -59,6 +59,37 @@
     if ([[UIApplication sharedApplication]
          respondsToSelector:@selector(registerUserNotificationSettings:)])
     {
+        
+        // Create the actions *******************************************************************************
+        
+        UIMutableUserNotificationAction *endParkingAction = [UIMutableUserNotificationAction new];
+        endParkingAction.identifier = @"SOSTA_TERMINA";
+        endParkingAction.title = NSLocalizedString(@"Termina", @"Label del pulsante Termina Sosta");
+        endParkingAction.activationMode = UIUserNotificationActivationModeBackground;
+        endParkingAction.authenticationRequired = YES;
+        endParkingAction.destructive = YES;
+        
+        UIMutableUserNotificationAction *extendParkingTimeAction = [UIMutableUserNotificationAction new];
+        extendParkingTimeAction.identifier = @"SOSTA_PROLUNGA";
+        extendParkingTimeAction.title = NSLocalizedString(@"Prolunga", @"Label del pulsante Prolunga Sosta");
+        extendParkingTimeAction.activationMode = UIUserNotificationActivationModeBackground;
+        extendParkingTimeAction.authenticationRequired = YES;
+        extendParkingTimeAction.destructive = NO;
+        
+        
+        
+        // Create the category *******************************************************************************
+        
+        UIMutableUserNotificationCategory *sostaCategory = [UIMutableUserNotificationCategory new];
+        sostaCategory.identifier = @"SOSTA_CATEGORY";
+        
+        [sostaCategory setActions:@[extendParkingTimeAction, endParkingAction] forContext:UIUserNotificationActionContextDefault];
+        [sostaCategory setActions:@[extendParkingTimeAction, endParkingAction] forContext:UIUserNotificationActionContextMinimal];
+        
+
+        
+        // Registration *******************************************************************************
+
         UIUserNotificationType types;
         UIUserNotificationSettings *settings;
 
@@ -68,7 +99,7 @@
         types = settings.types|UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound;
 
         settings = [UIUserNotificationSettings settingsForTypes:types
-                                                     categories:nil];
+                                                     categories:[NSSet setWithObject:sostaCategory]];
 
         [[UIApplication sharedApplication]
          registerUserNotificationSettings:settings];

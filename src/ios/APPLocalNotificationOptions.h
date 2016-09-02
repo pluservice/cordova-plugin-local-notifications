@@ -32,6 +32,7 @@
 @property (readonly, getter=badgeNumber) NSInteger badgeNumber;
 @property (readonly, getter=alertBody) NSString* alertBody;
 @property (readonly, getter=soundName) NSString* soundName;
+@property (readonly, getter=category) NSString* category;
 @property (readonly, getter=fireDate) NSDate* fireDate;
 @property (readonly, getter=repeatInterval) NSCalendarUnit repeatInterval;
 @property (readonly, getter=userInfo) NSDictionary* userInfo;
