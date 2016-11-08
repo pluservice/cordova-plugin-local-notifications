@@ -39,7 +39,7 @@ public class ParkingService {
 
         this.context = ctx;
         String appClient = "myCicero;"+ BuildConfig.VERSION_NAME;
-        this.networking = new PlusNetworking("8571428428571428571428", appClient, rules);
+        this.networking = new PlusNetworking("", appClient, rules);
 
         switch (env) {
             case Test: baseUrl = SOSTA_TEST_SERVICE_URL; break;
