@@ -24,15 +24,20 @@
 package de.appplant.cordova.plugin.notification;
 
 import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
+import org.apache.cordova.LOG;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Wrapper around the JSON object passed through JS which contains all
@@ -43,6 +48,12 @@ public class Options {
 
     // Key name for bundled extras
     static final String EXTRA = "NOTIFICATION_OPTIONS";
+
+    // Key name for button action extra
+    static final String ACTION = "NOTIFICATION_ACTION";
+
+    // Log tag
+    static final String TAG = "NotificationOptions";
 
     // The original JSON object
     private JSONObject options = new JSONObject();
@@ -60,10 +71,9 @@ public class Options {
     /**
      * Constructor
      *
-     * @param context
-     *      Application context
+     * @param context Application context
      */
-    public Options(Context context){
+    public Options(Context context) {
     	this.context = context;
         this.assets  = AssetUtil.getInstance(context);
     }
@@ -71,10 +81,9 @@ public class Options {
     /**
      * Parse given JSON properties.
      *
-     * @param options
-     *      JSON properties
+     * @param options JSON properties
      */
-    public Options parse (JSONObject options) {
+    public Options parse(JSONObject options) {
         this.options = options;
 
         parseInterval();
@@ -91,29 +100,21 @@ public class Options {
 
         if (every.isEmpty()) {
             interval = 0;
-        } else
-        if (every.equals("second")) {
+        } else if (every.equals("second")) {
             interval = 1000;
-        } else
-        if (every.equals("minute")) {
+        } else if (every.equals("minute")) {
             interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES / 15;
-        } else
-        if (every.equals("hour")) {
+        } else if (every.equals("hour")) {
             interval = AlarmManager.INTERVAL_HOUR;
-        } else
-        if (every.equals("day")) {
+        } else if (every.equals("day")) {
             interval = AlarmManager.INTERVAL_DAY;
-        } else
-        if (every.equals("week")) {
+        } else if (every.equals("week")) {
             interval = AlarmManager.INTERVAL_DAY * 7;
-        } else
-        if (every.equals("month")) {
+        } else if (every.equals("month")) {
             interval = AlarmManager.INTERVAL_DAY * 31;
-        } else
-        if (every.equals("quarter")) {
+        } else if (every.equals("quarter")) {
             interval = AlarmManager.INTERVAL_HOUR * 2190;
-        } else
-        if (every.equals("year")) {
+        } else if (every.equals("year")) {
             interval = AlarmManager.INTERVAL_DAY * 365;
         } else {
             try {
@@ -146,15 +147,23 @@ public class Options {
     /**
      * Application context.
      */
-    public Context getContext () {
+    public Context getContext() {
         return context;
     }
 
     /**
      * Wrapped JSON object.
      */
-    JSONObject getDict () {
+    JSONObject getDict() {
         return options;
+    }
+
+    public void setExtra(JSONObject extra) throws JSONException {
+        options.put("data", extra);
+    }
+
+    public void setSound(String sound) throws JSONException {
+        options.put("soundUri", sound);
     }
 
     /**
@@ -162,6 +171,10 @@ public class Options {
      */
     public String getText() {
         return options.optString("text", "");
+    }
+
+    public void setText(String txt) throws JSONException {
+        options.put("text", txt);
     }
 
     /**
@@ -239,8 +252,7 @@ public class Options {
     }
 
     /**
-     * @return
-     *      The notification color for LED
+     * @return The notification color for LED
      */
     public int getLedColor() {
         String hex = options.optString("led", null);
@@ -255,8 +267,7 @@ public class Options {
     }
 
     /**
-     * @return
-     *      The time that the LED should be on (in milliseconds).
+     * @return The time that the LED should be on (in milliseconds).
      */
     public int getLedOnTime() {
         String timeOn = options.optString("ledOnTime", null);
@@ -273,8 +284,7 @@ public class Options {
     }
 
     /**
-     * @return
-     *      The time that the LED should be off (in milliseconds).
+     * @return The time that the LED should be off (in milliseconds).
      */
     public int getLedOffTime() {
         String timeOff = options.optString("ledOffTime", null);
@@ -291,8 +301,7 @@ public class Options {
     }
 
     /**
-     * @return
-     *      The notification background color for the small icon
+     * @return The notification background color for the small icon
      *      Returns null, if no color is given.
      */
     public int getColor() {
@@ -313,9 +322,9 @@ public class Options {
     public Uri getSoundUri() {
         Uri uri = null;
 
-        try{
+        try {
             uri = Uri.parse(options.optString("soundUri"));
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -331,7 +340,7 @@ public class Options {
         try {
             Uri uri = Uri.parse(options.optString("iconUri"));
             bmp = assets.getIconFromUri(uri);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             bmp = assets.getIconFromDrawable("icon");
         }
@@ -342,7 +351,7 @@ public class Options {
     /**
      * Icon resource ID for the local notification.
      */
-    public int getIcon () {
+    public int getIcon() {
         String icon = options.optString("icon", "");
 
         int resId = assets.getResIdForDrawable(icon);
@@ -361,10 +370,68 @@ public class Options {
     /**
      * Small icon resource ID for the local notification.
      */
-    public int getSmallIcon () {
+    public int getSmallIcon() {
         String icon = options.optString("smallIcon", "");
 
         return assets.getResIdForDrawable(icon);
+    }
+
+    /**
+     * Action buttons for notification
+     */
+    public NotificationCompat.Action[] getActions() {
+
+        // recupero l'array delle actions che mi arrivano dal javascript
+        JSONArray actions = options.optJSONArray("actions");
+
+        // se non ne ho specificate, oppure trovo un array vuoto, esco subito
+        if (actions == null || actions.length() < 1) return new NotificationCompat.Action[0];
+
+        // inizializzo l'array che tornerò
+        NotificationCompat.Action[] notificationActions = new NotificationCompat.Action[actions.length()];
+
+        // ciclo le actions e creo le corrispondenti `NotificationCompat.Action` da mettere nell'array
+        for (int i = 0; i < actions.length(); i++) {
+            try {
+                // recupero l'iesimo `JSONObject`
+                JSONObject action = actions.optJSONObject(i);
+
+                // se è nullo vado avanti con l'iterazione successiva
+                if (action == null) {
+                    LOG.w(TAG, "Null action found. Skipping!");
+                    continue;
+                }
+
+                String actionLabel = action.optString("label", null);
+//                String actionDeepLink = action.optString("uri", null);
+                String actionId = action.optString("id", null);
+
+                int actionRequestCode = NotificationActions.requestCodeForAction(actionId);
+
+                if (actionLabel == null || actionRequestCode < 0) {
+                    LOG.w(TAG, "Invalid action found. Skipping!");
+                    continue;
+                }
+
+                Class clickActivityClass = ClickActivity.class;
+
+                if (clickActivityClass == null) {
+                    LOG.e(TAG, "Click activity not found. Very Bad... Breaking!");
+                    break;
+                }
+
+                Intent actionIntent = new Intent(context, clickActivityClass)
+                        .putExtra(Options.EXTRA, options.toString())
+                        .putExtra(Options.ACTION, actionId)
+                        .setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                PendingIntent pendingIntent = PendingIntent.getActivity(
+                        context, new Random().nextInt(), actionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                notificationActions[i] = new NotificationCompat.Action.Builder(0, actionLabel, pendingIntent).build();
+            } catch (Exception e) {
+                LOG.e(TAG, "Eccezione in getActions()", e);
+            }
+        }
+        return notificationActions;
     }
 
     /**
@@ -372,6 +439,23 @@ public class Options {
      */
     public String toString() {
         return options.toString();
+    }
+
+    /**
+     * Getter for MainActivity Class
+     *
+     * @return {java.lang.Class}
+     */
+    protected final Class getMainActivityClass() {
+        Class mainActivityClass = null;
+
+        try {
+            mainActivityClass = Class.forName(context.getPackageName() + ".MainActivity");
+        } catch (ClassNotFoundException e) {
+            LOG.e(TAG, "MainActivity not found", e);
+        }
+
+        return mainActivityClass;
     }
 
 }

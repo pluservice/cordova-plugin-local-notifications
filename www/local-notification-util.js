@@ -66,6 +66,7 @@ exports.applyPlatformSpecificOptions = function () {
         defaults.icon      = 'res://ic_popup_reminder';
         defaults.smallIcon = undefined;
         defaults.ongoing   = false;
+        defaults.actions   = undefined;
         defaults.autoClear = true;
         defaults.led       = undefined;
         defaults.ledOnTime = undefined;

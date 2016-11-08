@@ -62,7 +62,7 @@ public class Notification {
     private final Options options;
 
     // Builder with full configuration
-    private final NotificationCompat.Builder builder;
+    public final NotificationCompat.Builder builder;
 
     // Receiver to handle the trigger event
     private Class<?> receiver = defaultReceiver;

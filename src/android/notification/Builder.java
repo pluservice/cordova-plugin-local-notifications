@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
+import org.apache.cordova.LOG;
 import org.json.JSONObject;
 
 import java.util.Random;
@@ -38,6 +39,8 @@ import java.util.Random;
  * notification specified by JSON object passed from JS side.
  */
 public class Builder {
+
+    static final String TAG = "Builder";
 
     // Application context passed by constructor
     private final Context context;
@@ -129,6 +132,12 @@ public class Builder {
                 .setAutoCancel(options.isAutoClear())
                 .setOngoing(options.isOngoing())
                 .setColor(options.getColor());
+
+        NotificationCompat.Action actions[] = options.getActions();
+        for (NotificationCompat.Action action : actions) {
+            if (action != null) builder.addAction(action);
+            else LOG.w(TAG, "Skippo la action che era null");
+        }
 
         if (ledColor != 0) {
             builder.setLights(ledColor, options.getLedOnTime(), options.getLedOffTime());

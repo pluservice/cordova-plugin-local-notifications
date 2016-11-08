@@ -23,8 +23,6 @@
 
 package de.appplant.cordova.plugin.localnotification;
 
-import android.os.Build;
-
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;

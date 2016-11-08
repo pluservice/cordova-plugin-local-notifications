@@ -55,13 +55,16 @@ abstract public class AbstractClickActivity extends Activity {
             String data = bundle.getString(Options.EXTRA);
             JSONObject options = new JSONObject(data);
 
+            String action = bundle.getString(Options.ACTION, null);
+
             Builder builder =
                     new Builder(context, options);
 
             Notification notification =
                     buildNotification(builder);
 
-            onClick(notification);
+            if (action != null) onButtonClick(notification, action);
+            else onClick(notification);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -84,6 +87,8 @@ abstract public class AbstractClickActivity extends Activity {
      *      Wrapper around the local notification
      */
     abstract public void onClick (Notification notification);
+
+    abstract public void onButtonClick(Notification notification, String action);
 
     /**
      * Build notification specified by options.
