@@ -26,7 +26,6 @@ package de.appplant.cordova.plugin.notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -47,23 +46,19 @@ abstract public class AbstractRestoreReceiver extends BroadcastReceiver {
      * @param intent
      *      Received intent with content data
      */
-    private String tag = "LOCAL_NOTIFICATIONS";
-
     @Override
     public void onReceive (Context context, Intent intent) {
-        Manager notificationMgr = Manager.getInstance(context);
-        
-        notificationMgr.cleanUpExpiredNotifications();
+        Manager notificationMgr =
+                Manager.getInstance(context);
 
-        Log.i(tag, "Carico le notifiche rimanenti dopo la pulizia");
-        List<JSONObject> options = notificationMgr.getOptions();
+        List<JSONObject> options =
+                notificationMgr.getOptions();
 
         for (JSONObject data : options) {
-            Log.i(tag,"Trovata una notifica da mostrare");
             Builder builder = new Builder(context, data);
 
-            Notification notification = buildNotification(builder);
-            Log.i(tag,"Ho creato la notifica dal builder");
+            Notification notification =
+                    buildNotification(builder);
 
             onRestore(notification);
         }

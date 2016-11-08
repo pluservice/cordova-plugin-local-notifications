@@ -180,7 +180,7 @@ NSString* const DEFAULT_SOUND = @"res://platform_default";
         return NSCalendarUnitYear;
     }
 
-    return 0;
+    return NSCalendarUnitEra;
 }
 
 #pragma mark -

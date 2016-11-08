@@ -23,8 +23,6 @@
 
 package de.appplant.cordova.plugin.localnotification;
 
-import android.util.Log;
-
 import de.appplant.cordova.plugin.notification.AbstractRestoreReceiver;
 import de.appplant.cordova.plugin.notification.Builder;
 import de.appplant.cordova.plugin.notification.Notification;
@@ -42,22 +40,13 @@ public class RestoreReceiver extends AbstractRestoreReceiver {
      * @param notification
      *      Wrapper around the local notification
      */
-    private String tag = "LOCAL_NOTIFICATIONS";
-
     @Override
     public void onRestore (Notification notification) {
-        Log.i(tag,"Invocato restore receiver per la notifica");
-        // ENRICO: Siccome ho già filtrato a monte le notifiche, sono sicuro che quelle che arrivano qui sono buone quindi
-        // skippo il controllo successivo
-        /*if (notification.isScheduled()) {
-            Log.i(tag, "La notifica è schedulata");
+        if (notification.isScheduled()) {
             notification.schedule();
         } else {
-            Log.i(tag,"La notifica non è scehdulata e quindi la elimino");
             notification.cancel();
-        }*/
-        // e mostro direttamente la notifica :D
-        notification.schedule();
+        }
     }
 
     /**
