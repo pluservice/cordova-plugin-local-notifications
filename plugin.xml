@@ -81,6 +81,7 @@
     <platform name="android">
 
         <framework src="com.android.support:support-v4:+" value="gradle" />
+		<framework src="com.squareup.okhttp3:okhttp:3.4.1" type="gradle" />
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="LocalNotification">
