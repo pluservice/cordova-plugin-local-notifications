@@ -193,7 +193,15 @@
             target-dir="src/de/appplant/cordova/plugin/notification" />
 
         <source-file
+            src="src/android/notification/NotificationActions.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
+
+        <source-file
             src="src/android/notification/Options.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
+
+        <source-file
+            src="src/android/notification/ParkingService.java"
             target-dir="src/de/appplant/cordova/plugin/notification" />
 
         <source-file
