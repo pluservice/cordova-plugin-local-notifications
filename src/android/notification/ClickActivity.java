@@ -26,6 +26,8 @@ package de.appplant.cordova.plugin.notification;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.widget.Toast;
@@ -42,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import de.appplant.cordova.plugin.LyfecycleHandler;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -57,7 +60,7 @@ import okio.Buffer;
  */
 public class ClickActivity extends AbstractClickActivity implements Callback {
 
-    private static final String ISO8601_DATE_FORMAT= "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    private static final String ISO8601_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     public final static String TAG = "ClickActivity";
     protected Map<String, Notification> notifications = new ArrayMap<String, Notification>();
@@ -92,7 +95,8 @@ public class ClickActivity extends AbstractClickActivity implements Callback {
         }
 
         ParkingService.Env env = ParkingService.Env.Prod;
-        if ("test".equalsIgnoreCase(data.optString(NotifictionDataKeys.AMBIENTE))) env = ParkingService.Env.Test;
+        if ("test".equalsIgnoreCase(data.optString(NotifictionDataKeys.AMBIENTE)))
+            env = ParkingService.Env.Test;
 
         ParkingService service = new ParkingService(this, env);
 
@@ -181,7 +185,7 @@ public class ClickActivity extends AbstractClickActivity implements Callback {
 
         try {
             if (response.isSuccessful()) {
-                JSONObject requestBody = new JSONObject(bodyToString(request.body()));
+                JSONObject requestBody = new JSONObject(Utils.bodyToString(request.body()));
                 String rifVendita = requestBody.getString("RifVendita");
 
                 ResponseBody body = response.body();
@@ -195,8 +199,7 @@ public class ClickActivity extends AbstractClickActivity implements Callback {
                         onParkingExtendResponse(responseData, rifVendita);
                     } else if (ParkingService.TERMINA_SOSTA.equalsIgnoreCase(method)) {
                         onParkingStopResponse(responseData, rifVendita);
-                    }
-                    else this.notifyGenericError();
+                    } else this.notifyGenericError();
                 } else this.notifyGenericError();
             } else this.notifyGenericError();
         } catch (JSONException ex) {
@@ -239,6 +242,8 @@ public class ClickActivity extends AbstractClickActivity implements Callback {
                 makeToast(String.format(getString(getStringIdentifier("SOSTA_EXTENDED")), formatted));
                 LOG.d(TAG, formatted);
 
+                if (LyfecycleHandler.isApplicationInForeground()) tellJavascriptToResume();
+
                 Notification notification = notifications.get(rifVendita);
                 if (notification == null) notifyGenericError();
                 else {
@@ -269,19 +274,22 @@ public class ClickActivity extends AbstractClickActivity implements Callback {
         if (notification == null) notifyGenericError();
         else {
             manager.cancel(notification.getId());
+
+            // cancello anche la notifica di fine sosta
+            manager.cancel(Integer.parseInt(rifVendita));
+
             makeToast(getString(getStringIdentifier("SOSTA_STOPPED")));
+            if (LyfecycleHandler.isApplicationInForeground()) tellJavascriptToResume();
         }
     }
 
-    private static String bodyToString(final RequestBody request){
+    protected void tellJavascriptToResume() {
         try {
-            final RequestBody copy = request;
-            final Buffer buffer = new Buffer();
-            copy.writeTo(buffer);
-            return buffer.readUtf8();
-        }
-        catch (final IOException e) {
-            return "did not work";
+            String appSchema = getString(getStringIdentifier("appschema"));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(appSchema + "://go?action=sosta_refresh"));
+            startActivity(intent);
+        } catch (Exception ex) {
+            Log.e(TAG, "Unable to send reload message to app", ex);
         }
     }
 

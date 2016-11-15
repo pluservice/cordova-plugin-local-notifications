@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="net.pluservice.plugins.local-notification"
-        version="0.9.0">
+        version="0.9.1">
 
     <name>LocalNotification</name>
 
@@ -132,6 +132,10 @@
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
         </config-file>
 
+		<edit-config file="AndroidManifest.xml" target="/manifest/application" mode="merge">
+			<application android:name="de.appplant.cordova.plugin.MyApplication"></application>
+		</edit-config>
+		
         <source-file
             src="src/android/LocalNotification.java"
             target-dir="src/de/appplant/cordova/plugin/localnotification" />
@@ -207,6 +211,18 @@
         <source-file
             src="src/android/notification/TriggerReceiver.java"
             target-dir="src/de/appplant/cordova/plugin/notification" />
+			
+		<source-file
+			src="src/android/LyfecycleHandler.java"
+			target-dir="src/de/appplant/cordova/plugin" />
+		
+		<source-file
+			src="src/android/MyApplication.java"
+			target-dir="src/de/appplant/cordova/plugin" />
+			
+		<source-file
+			src="src/android/notification/Utils.java"
+			target-dir="src/de/appplant/cordova/plugin/notification" />
 
     </platform>
 
