@@ -24,7 +24,9 @@
 package de.appplant.cordova.plugin.notification;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -48,10 +50,8 @@ import de.appplant.cordova.plugin.LyfecycleHandler;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okio.Buffer;
 
 /**
  * The receiver activity is triggered when a notification is clicked by a user.
@@ -172,6 +172,7 @@ public class ClickActivity extends AbstractClickActivity implements Callback {
     @Override
     public void onFailure(Call call, IOException e) {
         LOG.e(TAG, "onFailure", e);
+        this.notifyGenericError();
     }
 
     @Override
@@ -267,16 +268,29 @@ public class ClickActivity extends AbstractClickActivity implements Callback {
     protected void onParkingStopResponse(final JSONObject responseData, final String rifVendita) throws JSONException {
 
         // make notification go away
+        Notification ongoingNotification = notifications.get(rifVendita);
 
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification notification = notifications.get(rifVendita);
-
-        if (notification == null) notifyGenericError();
+        if (ongoingNotification == null) notifyGenericError();
         else {
-            manager.cancel(notification.getId());
+            ongoingNotification.cancel();
 
             // cancello anche la notifica di fine sosta
-            manager.cancel(Integer.parseInt(rifVendita));
+            try {
+                // ottengo l'alarmManager e il notificationManager
+                Context ctx = getApplicationContext();
+                AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+                NotificationManager notificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                // ricreo il pi che abbia come intent uno con action == rifVendita
+                Intent intent = new Intent(ctx, de.appplant.cordova.plugin.localnotification.TriggerReceiver.class).setAction(rifVendita);
+                PendingIntent pi = PendingIntent.getBroadcast(ctx, 0, intent, 0);
+
+                // infine cancello la notifica
+                alarmManager.cancel(pi);
+                notificationManager.cancel(Integer.parseInt(rifVendita));
+            } catch (Exception e) {
+                LOG.e(TAG, "Unable to cancel other notification");
+            }
 
             makeToast(getString(getStringIdentifier("SOSTA_STOPPED")));
             if (LyfecycleHandler.isApplicationInForeground()) tellJavascriptToResume();
