@@ -282,11 +282,15 @@ public class ClickActivity extends AbstractClickActivity implements Callback {
                 NotificationManager notificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 
                 // ricreo il pi che abbia come intent uno con action == rifVendita
-                Intent intent = new Intent(ctx, de.appplant.cordova.plugin.localnotification.TriggerReceiver.class).setAction(rifVendita);
-                PendingIntent pi = PendingIntent.getBroadcast(ctx, 0, intent, 0);
+                Intent intent1 = new Intent(ctx, de.appplant.cordova.plugin.localnotification.TriggerReceiver.class).setAction(rifVendita);
+                PendingIntent pi1 = PendingIntent.getBroadcast(ctx, 0, intent1, 0);
+
+                Intent intent2 = new Intent(ctx, de.appplant.cordova.plugin.notification.TriggerReceiver.class).setAction(rifVendita);
+                PendingIntent pi2 = PendingIntent.getBroadcast(ctx, 0, intent2, 0);
 
                 // infine cancello la notifica
-                alarmManager.cancel(pi);
+                alarmManager.cancel(pi1);
+                alarmManager.cancel(pi2);
                 notificationManager.cancel(Integer.parseInt(rifVendita));
             } catch (Exception e) {
                 LOG.e(TAG, "Unable to cancel other notification");
