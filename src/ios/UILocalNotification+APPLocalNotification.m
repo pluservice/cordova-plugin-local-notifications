@@ -67,6 +67,7 @@ NSInteger const APPLocalNotificationTypeTriggered = 2;
     }
     self.alertBody = options.alertBody;
     self.soundName = options.soundName;
+    self.category = options.category;
 
     if ([self wasInThePast]) {
         self.fireDate = [NSDate date];
