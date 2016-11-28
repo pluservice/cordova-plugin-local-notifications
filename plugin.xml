@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="net.pluservice.plugins.local-notification"
-        version="0.9.4">
+        version="0.9.5">
 
     <name>LocalNotification</name>
 
@@ -113,6 +113,10 @@
                 android:name="de.appplant.cordova.plugin.notification.ClearReceiver"
                 android:exported="false" />
 
+            <receiver
+                android:name="de.appplant.cordova.plugin.localnotification.ClearOngoingNotificationsReceiver"
+                android:exported="false" />
+
             <receiver android:name="de.appplant.cordova.plugin.localnotification.RestoreReceiver" android:exported="false" >
                 <intent-filter>
                     <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -154,6 +158,10 @@
 
         <source-file
             src="src/android/RestoreReceiver.java"
+            target-dir="src/de/appplant/cordova/plugin/localnotification" />
+
+        <source-file
+            src="src/android/ClearOngoingNotificationsReceiver.java"
             target-dir="src/de/appplant/cordova/plugin/localnotification" />
 
         <source-file

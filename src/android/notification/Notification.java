@@ -33,10 +33,16 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
+import org.apache.cordova.LOG;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import de.appplant.cordova.plugin.localnotification.ClearOngoingNotificationsReceiver;
 
 /**
  * Wrapper class around OS notification class. Handles basic operations
@@ -185,6 +191,49 @@ public class Notification {
         } else {
             getAlarmMgr().set(AlarmManager.RTC_WAKEUP, triggerTime, pi);
         }
+
+        /**
+         * Se ho creato una notifica onGoing devo creare un altro allarme che verrà triggerato al momento della
+         * scadenza della sosta
+         */
+
+        if (options.isOngoing()) {
+            try {
+
+                // Questo intent viene lanciato subito per eliminare eventuali allarmi presenti per questa notifica
+                Intent intent1 = new Intent(context, ClearOngoingNotificationsReceiver.class).setAction(options.getIdStr());
+                PendingIntent pi1 = PendingIntent.getBroadcast(context, 0, intent1, 0);
+                getAlarmMgr().cancel(pi1);
+
+                // Adesso ricreo un nuovo intent che dovrà scattare quando la sosta termina
+                Intent intent2 = new Intent(context, ClearOngoingNotificationsReceiver.class).setAction(options.getIdStr());
+
+                PendingIntent pi2 = PendingIntent.getBroadcast(context, 0, intent2, 0);
+;
+                JSONObject data = null;
+                try {
+                    data = new JSONObject(options.getDict().optString("data", "{}"));
+                } catch (JSONException e) {
+                    LOG.e(ClearOngoingNotificationsReceiver.LOG_TAG,"JSONObject parse notification data", e);
+                }
+                final DateFormat dateFormat = new SimpleDateFormat(ISO8601_DATE_FORMAT); // ISO Date format
+                long millis = parseDateString(dateFormat, data.getString("endTime")).getTime();
+
+                getAlarmMgr().set(AlarmManager.RTC_WAKEUP, millis, pi2);
+
+
+            } catch (Exception e) {
+                LOG.e(ClearOngoingNotificationsReceiver.LOG_TAG, "Unable to schedule ongoing notification clear intent");
+            }
+        }
+    }
+    private static final String ISO8601_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+
+    protected Date parseDateString(DateFormat dateFormat, String jsonDate) throws ParseException {
+        if (jsonDate.endsWith("Z"))
+            jsonDate = jsonDate.substring(0, jsonDate.length() - 1) + "+0000";
+
+        return dateFormat.parse(jsonDate);
     }
 
     /**
