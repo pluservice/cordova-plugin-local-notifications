@@ -3,6 +3,11 @@ ChangeLog
 
 Please also read the [Upgrade Guide](https://github.com/katzer/cordova-plugin-local-notifications/wiki/Upgrade-Guide) for more information.
 
+#### Version 0.9.6 (30.12.2016)
+- Bugfix / Enhancement
+	- [MOMO-2737#6] Added rescheduling of parking ending notification on ongoing notification's _EXTEND_ button is clicked
+
+
 #### Version 0.8.4 (04.01.2016)
 - Bug fixes
  - SyntaxError: missing ) after argument list

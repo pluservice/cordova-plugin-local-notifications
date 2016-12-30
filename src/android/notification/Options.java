@@ -458,4 +458,58 @@ public class Options {
         return mainActivityClass;
     }
 
+    //==============================================================================================
+    // MOMO 2737
+    //==============================================================================================
+
+    public void setId (Integer id) throws JSONException {
+        options.put("id",id);
+    }
+    public void setTitle (String title) throws JSONException {
+        options.put("title", title);
+    }
+    // setText già implementato
+    public void setEvery (String every) throws JSONException {
+        options.put("every", every);
+    }
+    public void setAt (long trigger) throws JSONException {
+        options.put("at",trigger);
+    }
+    public void setBadge (int badge) throws JSONException {
+        options.put("badge", badge);
+    }
+    public void setIcon (String icon) throws JSONException {
+        options.put("icon",icon);
+    }
+    public void setSmallIcon (String icon) throws JSONException {
+        options.put("smallIcon",icon);
+    }
+    public void setLedHex (String ledHex) throws JSONException {
+        options.put("color", ledHex);
+    }
+    public void setOngoing(boolean isOngoing) throws JSONException {
+        options.put("ongoing", isOngoing);
+    }
+    public void setAutoClear (boolean autoClear) throws JSONException {
+        options.put("autoClear", autoClear);
+    }
+    public String getPureIcon () {
+        return options.optString("icon", "");
+    }
+    public String getPureSmallIcon () {
+        return options.optString("smallIcon", "");
+    }
+    public String getPureColor () {
+        return options.optString("color", null);
+    }
+    public String getNomeParcheggio () {
+        return options.optString("parcheggio", null);
+    }
+
+//    public void setIconUri (String iconUri) throws JSONException {
+//        options.put("iconUri", iconUri);
+//    }
+//    public void setSmallIconUri (String iconUri) throws JSONException {
+//        options.put("smallIconUri", iconUri);
+//    }
 }

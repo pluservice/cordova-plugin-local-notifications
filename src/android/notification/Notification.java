@@ -221,6 +221,37 @@ public class Notification {
 
                 getAlarmMgr().set(AlarmManager.RTC_WAKEUP, millis, pi2);
 
+                // MOMO 2737 Debug #6
+                // Prima rimuovo eventuali notifiche con action  = rifVendita che sono quelle non ongoing associate a questa
+                String rifVendita = data.getString("rifVendita");
+                intent = new Intent(context, receiver).setAction(rifVendita);
+                pi = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                getAlarmMgr().cancel(pi);
+                triggerTime = millis - (15 * 60 * 1000);
+
+                // Qui avrò che:
+                // millis = ora fine sosta
+                // triggerTime = 15 min prima della fine sosta
+                // A questo punto la devo rischedulare
+                JSONObject newOptsData = new JSONObject();
+                newOptsData.put("id", Integer.parseInt(rifVendita));
+                newOptsData.put("title", data.getString("messaggioScadenzaImminente"));
+                newOptsData.put("text", data.getString("parcheggio"));
+                newOptsData.put("at", triggerTime);
+                newOptsData.put("icon", options.getPureIcon());
+                newOptsData.put("smallIcon",options.getPureSmallIcon());
+                Options newOpts = new Options(context).parse(newOptsData);
+
+                // Questo è l'allarme che triggera la notifica a 15min dalla fine della sosta
+                intent = new Intent(context, receiver).setAction(rifVendita).putExtra(Options.EXTRA, newOpts.toString());
+                pi = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                getAlarmMgr().set(AlarmManager.RTC_WAKEUP, triggerTime, pi);
+
+                // Questo è l'allarme che elimina
+                intent = new Intent(context, ClearReceiver.class).setAction(rifVendita).putExtra(Options.EXTRA, newOpts.toString());
+                pi = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                getAlarmMgr().set(AlarmManager.RTC_WAKEUP, millis, pi);
+
 
             } catch (Exception e) {
                 LOG.e(ClearOngoingNotificationsReceiver.LOG_TAG, "Unable to schedule ongoing notification clear intent");
