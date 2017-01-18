@@ -425,4 +425,14 @@ public class Notification {
         defaultReceiver = receiver;
     }
 
+    public static final class NotificationDataKeys {
+        public static final String EXTEND_MINUTES = "extendMinutes";
+        public static final String END_TIME = "endTime";
+        public static final String GUID_ACCOUNT = "guidAccount";
+        public static final String RIF_VENDITA = "rifVendita";
+        public static final String TESSERA = "tessera";
+        public static final String VETTORE = "vettore";
+        public static final String AMBIENTE = "ambiente";
+    }
+
 }

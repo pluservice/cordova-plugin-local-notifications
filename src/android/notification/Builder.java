@@ -27,12 +27,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
-
-import org.apache.cordova.LOG;
+import android.os.Build;
+import android.support.v7.app.NotificationCompat;
+import android.widget.RemoteViews;
 import org.json.JSONObject;
-
 import java.util.Random;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Builder class for local notifications. Build fully configured local
@@ -53,6 +54,12 @@ public class Builder {
 
     // Receiver to handle the clear event
     private Class<?> clearReceiver = ClearReceiver.class;
+
+    // Receiver to handle the prolunga sosta event
+    private Class<?> prolungaSostaReceiver = ProlungaSostaReceiver.class;
+
+    // Receiver to handle the prolunga sosta event
+    private Class<?> terminaSostaReceiver = TerminaSostaReceiver.class;
 
     // Activity to handle the click event
     private Class<?> clickActivity = ClickActivity.class;
@@ -103,6 +110,11 @@ public class Builder {
         return this;
     }
 
+//    public Builder setProlungaSostaReceiver(Class<?> receiver) {
+//        this.prolungaSostaReceiver = receiver;
+//        return this;
+//    }
+
     /**
      * Set click activity.
      *
@@ -122,21 +134,84 @@ public class Builder {
         int smallIcon = options.getSmallIcon();
         int ledColor  = options.getLedColor();
         NotificationCompat.Builder builder;
+        NotificationStyleDiscovery notificationStyle = new NotificationStyleDiscovery(context);
 
-        builder = new NotificationCompat.Builder(context)
-                .setDefaults(0)
-                .setContentTitle(options.getTitle())
-                .setContentText(options.getText())
-                .setNumber(options.getBadgeNumber())
-                .setTicker(options.getText())
-                .setAutoCancel(options.isAutoClear())
-                .setOngoing(options.isOngoing())
-                .setColor(options.getColor());
+        if(options.isOngoing() == false) {
+            builder = (android.support.v7.app.NotificationCompat.Builder) new NotificationCompat.Builder(context)
+                    .setDefaults(0)
+                    .setContentTitle(options.getTitle())
+                    .setContentText(options.getText())
+                    .setNumber(options.getBadgeNumber())
+                    .setTicker(options.getText())
+                    .setAutoCancel(options.isAutoClear())
+                    .setOngoing(options.isOngoing())
+                    .setColor(options.getColor());
 
-        NotificationCompat.Action actions[] = options.getActions();
-        for (NotificationCompat.Action action : actions) {
-            if (action != null) builder.addAction(action);
-            else LOG.w(TAG, "Skippo la action che era null");
+            if (smallIcon == 0) {
+                builder.setSmallIcon(options.getIcon());
+            } else {
+                builder.setSmallIcon(options.getSmallIcon());
+                builder.setLargeIcon(options.getIconBitmap());
+            }
+        }
+
+        else{
+            builder = (android.support.v7.app.NotificationCompat.Builder) new NotificationCompat.Builder(context)
+                    .setDefaults(0)
+                    .setNumber(options.getBadgeNumber())
+                    .setTicker(options.getText())
+                    .setAutoCancel(options.isAutoClear())
+                    .setOngoing(options.isOngoing())
+                    .setColor(options.getColor());
+
+            // Le seguenti istruzioni andranno decommentante e inserite da un'altra parte se si decide di parametrizzare il tipo di notifica
+
+//            NotificationCompat.Action actions[] = options.getActions();
+//            for (NotificationCompat.Action action : actions) {
+//                if (action != null) builder.addAction(action);
+//                else LOG.w(TAG, "Skippo la action che era null");
+//            }
+
+            RemoteViews templateCollapsedNotification;
+            RemoteViews templateExpandedNotification;
+
+            if (Build.VERSION.SDK_INT <= 23) {
+                // Templates for HoneyComb to M
+                templateCollapsedNotification = new RemoteViews(context.getPackageName(), getResourceId("layout", "sosta_collapsed_notification_api_less_24"));
+                //templateExpandedNotification = new RemoteViews(context.getPackageName(), getResourceId("layout", "sosta_expanded_notification_api_less_24"));
+
+            } else {
+                // Templates for N and above
+                templateCollapsedNotification = new RemoteViews(context.getPackageName(), getResourceId("layout", "sosta_collapsed_notification"));
+                //templateExpandedNotification = new RemoteViews(context.getPackageName(), getResourceId("layout", "sosta_expanded_notification"));
+                //builder.setStyle(new NotificationCompat.DecoratedCustomViewStyle());
+            }
+
+            if(templateCollapsedNotification instanceof RemoteViews && templateCollapsedNotification != null) builder.setCustomContentView(templateCollapsedNotification);
+            // Il template espanso risulta visibile solo da Jelly Bean in poi, quindi la seguente istruzione non ha effetti su versioni precedenti di Android
+            //if(templateExpandedNotification instanceof RemoteViews && templateExpandedNotification != null) builder.setCustomBigContentView(templateExpandedNotification);
+
+            templateCollapsedNotification.setTextViewText(getResourceId("id", "titleNotification"), options.getTitle());
+            templateCollapsedNotification.setTextViewText(getResourceId("id", "textNotification"), options.getText());
+//            templateExpandedNotification.setTextViewText(getResourceId("id", "titleNotification"), options.getTitle());
+//            templateExpandedNotification.setTextViewText(getResourceId("id", "textNotification"), options.getText());
+
+            templateCollapsedNotification.setTextColor(getResourceId("id", "titleNotification"), notificationStyle.getTitleColor());
+            templateCollapsedNotification.setTextColor(getResourceId("id", "textNotification"), notificationStyle.getTextColor());
+//            templateExpandedNotification.setTextColor(getResourceId("id", "titleNotification"), notificationStyle.getTitleColor());
+//            templateExpandedNotification.setTextColor(getResourceId("id", "textNotification"), notificationStyle.getTextColor());
+
+            applySostaReceiver(templateCollapsedNotification, prolungaSostaReceiver, getResourceId("id", "buttonProlunga"));
+            applySostaReceiver(templateCollapsedNotification, terminaSostaReceiver, getResourceId("id", "buttonTermina"));
+//            applySostaReceiver(templateExpandedNotification, prolungaSostaReceiver, getResourceId("id", "buttonProlunga"));
+//            applySostaReceiver(templateExpandedNotification, terminaSostaReceiver, getResourceId("id", "buttonTermina"));
+
+            if (smallIcon == 0) {
+                builder.setSmallIcon(options.getIcon());
+            } else {
+                builder.setSmallIcon(options.getSmallIcon());
+                //builder.setLargeIcon(options.getIconBitmap());
+            }
         }
 
         if (ledColor != 0) {
@@ -145,13 +220,6 @@ public class Builder {
 
         if (sound != null) {
             builder.setSound(sound);
-        }
-
-        if (smallIcon == 0) {
-            builder.setSmallIcon(options.getIcon());
-        } else {
-            builder.setSmallIcon(options.getSmallIcon());
-            builder.setLargeIcon(options.getIconBitmap());
         }
 
         applyDeleteReceiver(builder);
@@ -182,6 +250,18 @@ public class Builder {
         builder.setDeleteIntent(deleteIntent);
     }
 
+    private void applySostaReceiver(RemoteViews template, Class<?> receiver, int buttonId) {
+
+//        boolean data = options.getDict().optBoolean("ongoing");
+//        if(data != true) return;
+
+        Intent clickIntent = new Intent(context, receiver)
+                .putExtra(Options.EXTRA, options.toString());
+        PendingIntent pendingClickIntent = PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        template.setOnClickPendingIntent(buttonId, pendingClickIntent);
+    }
+
     /**
      * Set intent to handle the click event. Will bring the app to
      * foreground.
@@ -204,6 +284,10 @@ public class Builder {
                 context, reqCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.setContentIntent(contentIntent);
+    }
+
+    private int getResourceId(String resType, String resName) {
+        return context.getResources().getIdentifier(resName, resType, context.getPackageName());
     }
 
 }

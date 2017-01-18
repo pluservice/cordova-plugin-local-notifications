@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="net.pluservice.plugins.local-notification"
-        version="0.9.6">
+        version="0.9.7">
 
     <name>LocalNotification</name>
 
@@ -90,7 +90,15 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
-
+			
+			<receiver 
+				android:exported="false" 
+				android:name="de.appplant.cordova.plugin.notification.ProlungaSostaReceiver" />
+			
+			<receiver 
+				android:exported="false" 
+				android:name="de.appplant.cordova.plugin.notification.TerminaSostaReceiver" />
+			
             <receiver
                 android:name="de.appplant.cordova.plugin.localnotification.TriggerReceiver"
                 android:exported="false" />
@@ -128,6 +136,22 @@
                 android:launchMode="singleInstance"
                 android:theme="@android:style/Theme.NoDisplay"
                 android:exported="false" />
+				
+			<activity 
+				android:excludeFromRecents="true" 
+				android:exported="false" 
+				android:launchMode="singleInstance" 
+				android:name="de.appplant.cordova.plugin.notification.TerminaSostaActivity" 
+				android:taskAffinity="" 
+				android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+			
+			<activity 
+				android:excludeFromRecents="true" 
+				android:exported="false" 
+				android:launchMode="singleInstance" 
+				android:name="de.appplant.cordova.plugin.notification.ProlungaSostaActivity" 
+				android:taskAffinity="" 
+				android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         </config-file>
 
@@ -140,6 +164,16 @@
 			<application android:name="de.appplant.cordova.plugin.MyApplication"></application>
 		</edit-config>
 		
+		<source-file src="res/layout/sosta_collapsed_notification.xml" target-dir="res/layout" />
+		<source-file src="res/layout/sosta_collapsed_notification_api_less_24.xml" target-dir="res/layout" />
+		<source-file src="res/layout/sosta_expanded_notification.xml" target-dir="res/layout" />
+		<source-file src="res/layout/sosta_expanded_notification_api_less_24.xml" target-dir="res/layout" />
+        <source-file src="res/values/notificationStyles.xml" target-dir="res/values" />
+        <source-file src="res/values-v21/notificationStyles.xml" target-dir="res/values-v21" />
+        <source-file src="res/values/notificationStrings.xml" target-dir="res/values" />
+        <source-file src="res/drawable/notify_extend.png" target-dir="res/drawable" />
+        <source-file src="res/drawable/notify_stop.png" target-dir="res/drawable" />
+
         <source-file
             src="src/android/LocalNotification.java"
             target-dir="src/de/appplant/cordova/plugin/localnotification" />
@@ -211,7 +245,33 @@
         <source-file
             src="src/android/notification/Options.java"
             target-dir="src/de/appplant/cordova/plugin/notification" />
-
+		<source-file
+            src="src/android/notification/AbstractProlungaSostaReceiver.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
+			
+		<source-file
+            src="src/android/notification/AbstractTerminaSostaReceiver.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
+			
+		<source-file
+            src="src/android/notification/NotificationStyleDiscovery.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
+			
+		<source-file
+            src="src/android/notification/ProlungaSostaActivity.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
+		
+		<source-file
+            src="src/android/notification/TerminaSostaActivity.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
+			
+		<source-file
+            src="src/android/notification/ProlungaSostaReceiver.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
+			
+		<source-file
+            src="src/android/notification/TerminaSostaReceiver.java"
+            target-dir="src/de/appplant/cordova/plugin/notification" />
         <source-file
             src="src/android/notification/ParkingService.java"
             target-dir="src/de/appplant/cordova/plugin/notification" />
