@@ -257,7 +257,7 @@ public class Builder {
 
         Intent clickIntent = new Intent(context, receiver)
                 .putExtra(Options.EXTRA, options.toString());
-        PendingIntent pendingClickIntent = PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingClickIntent = PendingIntent.getBroadcast(context, new Random().nextInt(), clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         template.setOnClickPendingIntent(buttonId, pendingClickIntent);
     }
