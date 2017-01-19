@@ -63,6 +63,8 @@ public class Builder {
 
     // Activity to handle the click event
     private Class<?> clickActivity = ClickActivity.class;
+	
+	final static String GROUP_KEY_SOSTE = "group_key_soste";
 
     /**
      * Constructor
@@ -158,10 +160,13 @@ public class Builder {
         else{
             builder = (android.support.v7.app.NotificationCompat.Builder) new NotificationCompat.Builder(context)
                     .setDefaults(0)
+					.setContentTitle(options.getTitle())
+                    .setContentText("- Fine Sosta: " + options.getText())
                     .setNumber(options.getBadgeNumber())
                     .setTicker(options.getText())
                     .setAutoCancel(options.isAutoClear())
                     .setOngoing(options.isOngoing())
+					.setGroup(GROUP_KEY_SOSTE)
                     .setColor(options.getColor());
 
             // Le seguenti istruzioni andranno decommentante e inserite da un'altra parte se si decide di parametrizzare il tipo di notifica

@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
 
 import org.apache.cordova.LOG;
@@ -43,6 +44,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import de.appplant.cordova.plugin.localnotification.ClearOngoingNotificationsReceiver;
+
+import static de.appplant.cordova.plugin.notification.Builder.GROUP_KEY_SOSTE;
 
 /**
  * Wrapper class around OS notification class. Handles basic operations
@@ -296,6 +299,17 @@ public class Notification {
 
         getAlarmMgr().cancel(pi);
         getNotMgr().cancel(options.getId());
+		
+		if (Build.VERSION.SDK_INT >= 24){
+            // esamino le notifiche attive
+            int groupedSostaNotifications = 0;
+            for (StatusBarNotification sbn : getNotMgr().getActiveNotifications()) {
+                // per ogni notifica appartenente al gruppo delle soste aumento il contatore
+                if(sbn.getNotification().getGroup().equals(GROUP_KEY_SOSTE)) groupedSostaNotifications++;
+            }
+            // se il contatore è pari ad 1 signfica che è rimasta solo la notifica che fa da contenitore, quindi la elimino
+            if(groupedSostaNotifications == 1) getNotMgr().cancel(0);
+        }
 
         unpersist();
     }
@@ -321,6 +335,20 @@ public class Notification {
         } else {
             // Notification for Jellybean and above
             getNotMgr().notify(id, builder.build());
+			
+			if (Build.VERSION.SDK_INT >= 24) {
+                NotificationCompat.Builder builderSummary;
+                builderSummary = new NotificationCompat.Builder(context)
+                        .setSmallIcon(options.getSmallIcon())
+                        //.setContentTitle("A Bundle Example")
+                        //.setContentText("You have 3 new messages")
+                        .setStyle(new NotificationCompat.InboxStyle()
+                                .setSummaryText("SOSTE ATTIVE"))
+                        .setGroup(GROUP_KEY_SOSTE)
+                        .setGroupSummary(true);
+                getNotMgr().notify(0, builderSummary.build());
+            }
+			
         }
     }
 
