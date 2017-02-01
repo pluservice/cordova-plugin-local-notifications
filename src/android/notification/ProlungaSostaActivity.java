@@ -16,8 +16,6 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
-import net.pluservice.myCiceroTest.R;
-
 import org.apache.cordova.LOG;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,31 +56,36 @@ public class ProlungaSostaActivity extends Activity implements Callback{
         Intent closeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.sendBroadcast(closeIntent);
 
-        String title = getResources().getString(R.string.app_name);
-        String message = "Vuoi prolungare la sosta di 30 minuti?";
+        String title = getResources().getString(getResources().getIdentifier("app_name", "string", getApplicationContext().getPackageName()));
+        String message = getResources().getString(getResources().getIdentifier("SOSTA_PROLUNGA_MSG", "string", getApplicationContext().getPackageName()));
 
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.alertDialog));
+//        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.alertDialog));
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(new ContextThemeWrapper(this, getResources().getIdentifier("alertDialog", "style", getApplicationContext().getPackageName())));
 
         alertDialogBuilder.setTitle(title)
                 .setMessage(message)
                 .setCancelable(false)
-                .setPositiveButton("Prolunga",new DialogInterface.OnClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int id)
+                .setPositiveButton(
+                    getResources().getString(getResources().getIdentifier("SOSTA_PROLUNGA", "string", getApplicationContext().getPackageName())),
+                    new DialogInterface.OnClickListener()
                     {
-                        dialog.dismiss();
-                        getNotificationAndProlungaSosta(context, bundle);
-                        finish();
-                    }
-                })
-                .setNegativeButton("Annulla", new DialogInterface.OnClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int id)
+                        public void onClick(DialogInterface dialog, int id)
+                        {
+                            dialog.dismiss();
+                            getNotificationAndProlungaSosta(context, bundle);
+                            finish();
+                        }
+                    })
+                .setNegativeButton(
+                    getResources().getString(getResources().getIdentifier("SOSTA_ANNULLA", "string", getApplicationContext().getPackageName())), 
+                    new DialogInterface.OnClickListener()
                     {
-                        dialog.cancel();
-                        finish();
-                    }
-                });
+                        public void onClick(DialogInterface dialog, int id)
+                        {
+                            dialog.cancel();
+                            finish();
+                        }
+                    });
         AlertDialog alert = alertDialogBuilder.create();
         alert.show();
         Button bp = alert.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -160,7 +163,8 @@ public class ProlungaSostaActivity extends Activity implements Callback{
         //nel caso in cui il dispositivo ha wifi o connessione dati disattivata viene restituita una UnknownHostException perchè non è in grado di tradurre l'indirizzo internet in indirizzo IP
         //nel caso in cui il dispositivo è connesso e riesce ad ottenere l'indirizzo IP ma il server non risponde entro l'intervallo di tempo definito, viene restituita una SocketTimeoutException
         if(e instanceof UnknownHostException || e instanceof SocketTimeoutException){
-            makeToast(getResources().getString(R.string.SOSTA_NETWORK_ERROR));
+//            makeToast(getResources().getString(R.string.SOSTA_NETWORK_ERROR));
+            makeToast(getResources().getString(getResources().getIdentifier("SOSTA_NETWORK_ERROR", "string", getApplicationContext().getPackageName())));
         }
         else this.notifyGenericError();
     }

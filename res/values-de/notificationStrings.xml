@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="SOSTA_NETWORK_ERROR">Ein Fehler ist aufgetreten: langsame oder überhaupt keine Netzwerkverbindung, bitte stellen Sie sicher, dass Sie Internet-Anschluss haben</string>
+    <string name="SOSTA_GENERIC_ERROR">An unexpected error occurred</string>
+	<string name="SOSTA_EXTENDED">Parking extended until %1$s</string>
+	<string name="SOSTA_STOPPED">Parking stopped</string>
+	<string name="SOSTA_DATE_FORMAT">d MMMM yyyy HH:mm</string>
+	<string name="SOSTA_PROLUNGA_MSG">Möchten Sie das Parken um 30 Minuten verlängern?</string>
+	<string name="SOSTA_TERMINA_MSG">Möchten Sie das Parken beenden?</string>
+	<string name="SOSTA_PROLUNGA">Verlängern</string>
+	<string name="SOSTA_TERMINA">Beenden</string>
+	<string name="SOSTA_ANNULLA">Annullieren</string>
+</resources>

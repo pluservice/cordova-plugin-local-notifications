@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="SOSTA_NETWORK_ERROR">Si è verificato un errore: connessione limitata o assente, accertarsi di essere connessi ad internet</string>
+    <string name="SOSTA_GENERIC_ERROR">Si è verificato un errore</string>
+	<string name="SOSTA_EXTENDED">Sosta prolungata fino a %1$s</string>
+	<string name="SOSTA_STOPPED">Sosta terminata</string>
+	<string name="SOSTA_DATE_FORMAT">d MMMM yyyy HH:mm</string>
+	<string name="SOSTA_PROLUNGA_MSG">Vuoi prolungare la sosta di 30 minuti?</string>
+	<string name="SOSTA_TERMINA_MSG">Vuoi terminare la sosta?</string>
+	<string name="SOSTA_PROLUNGA">Prolunga</string>
+	<string name="SOSTA_TERMINA">Termina</string>
+	<string name="SOSTA_ANNULLA">Annulla</string>
+</resources>

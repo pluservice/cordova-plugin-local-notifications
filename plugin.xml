@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="net.pluservice.plugins.local-notification"
-        version="0.9.8">
+        version="0.9.9">
 
     <name>LocalNotification</name>
 
@@ -171,6 +171,13 @@
         <source-file src="res/values/notificationStyles.xml" target-dir="res/values" />
         <source-file src="res/values-v21/notificationStyles.xml" target-dir="res/values-v21" />
         <source-file src="res/values/notificationStrings.xml" target-dir="res/values" />
+
+        <source-file src="res/values-it/notificationStrings.xml" target-dir="res/values-it" />
+        <source-file src="res/values-en/notificationStrings.xml" target-dir="res/values-en" />
+        <source-file src="res/values-de/notificationStrings.xml" target-dir="res/values-de" />
+        <source-file src="res/values-tr/notificationStrings.xml" target-dir="res/values-tr" />
+        <source-file src="res/values-ru/notificationStrings.xml" target-dir="res/values-ru" />
+
         <source-file src="res/drawable/notify_extend.png" target-dir="res/drawable" />
         <source-file src="res/drawable/notify_stop.png" target-dir="res/drawable" />
 
